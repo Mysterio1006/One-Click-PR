@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>One-Click PR</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-title">One-Click PR</div>
+    <div class="app-action" style="display: flex; align-items: center; gap: 12px;">
+      <!-- 多语言切换按钮 -->
+      <button class="btn-tonal" id="btn-lang-toggle" style="padding: 4px 10px; font-size: 13px; font-weight: bold; border-radius: 20px;">EN</button>
+      <div id="btn-open-settings" style="cursor: pointer;">
+        <img id="user-avatar" src="https://github.com/ghost.png" alt="Avatar">
+      </div>
+    </div>
+  </header>
+
+  <main class="content-area">
+    <!-- 卡片 1: 目标配置 -->
+    <div class="card">
+      <div class="card-title"><span class="i18n" data-zh="目标开源项目" data-en="Target Repository">目标开源项目</span></div>
+      <div class="input-group">
+        <label><span class="i18n" data-zh="HTTPS 克隆链接" data-en="HTTPS Clone URL">HTTPS 克隆链接</span></label>
+        <input type="url" id="target-url" class="i18n-ph" data-zh="https://github.com/作者/仓库.git" data-en="https://github.com/author/repo.git" placeholder="https://github.com/作者/仓库.git">
+      </div>
+      <div class="flex-row">
+        <div class="input-group">
+          <label><span class="i18n" data-zh="原分支" data-en="Base Branch">原分支</span></label>
+          <input type="text" id="base-branch" value="main">
+        </div>
+        <div class="input-group">
+          <label><span class="i18n" data-zh="新分支 (选填)" data-en="New Branch (Optional)">新分支 (选填)</span></label>
+          <input type="text" id="new-branch" class="i18n-ph" data-zh="pr-xxx" data-en="pr-xxx" placeholder="pr-xxx">
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 2: PR 内容与 Markdown 编辑器 -->
+    <div class="card">
+      <div class="card-title"><span class="i18n" data-zh="Pull Request 内容" data-en="Pull Request Content">Pull Request 内容</span></div>
+      <div class="input-group">
+        <label><span class="i18n" data-zh="标题" data-en="Title">标题</span> <span style="color:red">*</span></label>
+        <input type="text" id="pr-title" class="i18n-ph" data-zh="feat: 修复了xxx界面的显示异常" data-en="feat: fixed display issue in xxx" placeholder="feat: 修复了xxx界面的显示异常" value="fix: ">
+      </div>
+      
+      <!-- Markdown 编辑器 -->
+      <div class="md-editor">
+        <div class="md-tabs">
+          <button class="md-tab active i18n" data-zh="编辑" data-en="Write" id="tab-write">编辑</button>
+          <button class="md-tab i18n" data-zh="预览" data-en="Preview" id="tab-preview">预览</button>
+        </div>
+        <div class="md-body">
+          <textarea id="pr-desc" class="i18n-ph" data-zh="支持 Markdown 语法。您可以手动输入内容或粘贴图片链接。" data-en="Supports Markdown. You can manually enter text or paste image links." placeholder="支持 Markdown 语法。您可以手动输入内容或粘贴图片链接。"></textarea>
+          <div id="pr-preview" class="markdown-body hidden i18n" data-zh="加载预览中..." data-en="Loading preview...">加载预览中...</div>
+        </div>
+      </div>
+
+      <!-- GitHub 同款维护者编辑权限 -->
+      <label class="checkbox-label" style="margin-top: 12px; margin-bottom: 20px;">
+        <input type="checkbox" id="maintainer-edit" checked>
+        <span class="i18n" data-zh="允许维护者编辑此 PR" data-en="Allow edits from maintainers">允许维护者编辑此 PR</span>
+      </label>
+      
+      <div class="card-title" style="font-size: 14px; margin-bottom: 10px;"><span class="i18n" data-zh="文件改动区" data-en="File Changes">文件改动区</span></div>
+      <div class="action-buttons">
+        <input type="file" id="fileInput" multiple style="display: none;">
+        <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+        <button class="btn-tonal i18n" id="btn-add-file" data-zh="添加文件" data-en="Add File">添加文件</button>
+        <button class="btn-tonal i18n" id="btn-add-folder" data-zh="添加文件夹" data-en="Add Folder">添加文件夹</button>
+        <button class="btn-text danger i18n" id="btn-clear" data-zh="清空" data-en="Clear">清空</button>
+      </div>
+
+      <ul class="file-list" id="file-list">
+        <li class="empty-state i18n" data-zh="暂未添加任何文件" data-en="No files added yet">暂未添加任何文件</li>
+      </ul>
+    </div>
+    
+    <div style="height: 80px;"></div>
+  </main>
+
+  <!-- 底部固定栏 -->
+  <footer class="bottom-bar">
+    <button class="btn-primary full-width i18n" id="btn-submit" data-zh="一键自动 PR 推送" data-en="Auto Submit PR">一键自动 PR 推送</button>
+  </footer>
+
+  <!-- 账号设置弹窗 -->
+  <div id="settings-modal" class="modal-full hidden">
+    <header class="app-bar bg-gray">
+      <button class="icon-btn" id="btn-close-settings">✕</button>
+      <div class="app-title i18n" data-zh="全局凭证配置" data-en="Global Credentials">全局凭证配置</div>
+      <button class="icon-btn" style="opacity: 0;">✕</button>
+    </header>
+    <div class="content-area">
+      <div class="card" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" id="btn-open-history">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-weight: 600;" class="i18n" data-zh="查看历史推送 PR 状态" data-en="View PR Push History">查看历史推送 PR 状态</span>
+        </div>
+        <span style="color: var(--text-sub);">&rarr;</span>
+      </div>
+
+      <p class="helper-text i18n" data-zh="凭证将永久加密保存在本 App 中，除非清除应用数据，否则无需再次填写。" data-en="Credentials are encrypted and saved locally. No need to re-enter unless app data is cleared.">凭证将永久加密保存在本 App 中，除非清除应用数据，否则无需再次填写。</p>
+      <div class="card">
+        <div class="input-group">
+          <label><span class="i18n" data-zh="您的 GitHub 用户名" data-en="Your GitHub Username">您的 GitHub 用户名</span></label>
+          <input type="text" id="conf-owner" class="i18n-ph" data-zh="例如: Mysterio1006" data-en="e.g. Mysterio1006" placeholder="例如: Mysterio1006">
+        </div>
+        <div class="input-group">
+          <label><span class="i18n" data-zh="个人访问令牌 (Token)" data-en="Personal Access Token">个人访问令牌 (Token)</span></label>
+          <input type="password" id="conf-token" placeholder="ghp_xxxxxxxx...">
+        </div>
+      </div>
+      <button class="btn-primary full-width i18n" id="btn-save-settings" style="margin-top: 20px;" data-zh="保存凭证" data-en="Save Credentials">保存凭证</button>
+    </div>
+  </div>
+
+  <!-- 历史记录弹窗 -->
+  <div id="history-modal" class="modal-full hidden">
+    <header class="app-bar bg-gray">
+      <button class="icon-btn" id="btn-close-history">←</button>
+      <div class="app-title i18n" data-zh="推送历史" data-en="Push History">推送历史</div>
+      <button class="icon-btn i18n" id="btn-clear-history" style="font-size: 14px; color: #ff3b30; font-weight: bold;" data-zh="清除" data-en="Clear">清除</button>
+    </header>
+    <div class="content-area" style="padding: 10px;">
+      <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+  </div>
+
+  <!-- 执行进度遮罩层 -->
+  <div id="progress-modal" class="modal-overlay hidden">
+    <div class="progress-card">
+      <h3 id="progress-title" class="i18n" data-zh="正在执行云端流转..." data-en="Executing cloud workflow...">正在执行云端流转...</h3>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+      </div>
+      <div class="log-box" id="log-box"></div>
+      
+      <div id="pr-success-area" class="hidden" style="margin-top: 15px;">
+        <p style="color: #10b981; font-weight: bold;" class="i18n" data-zh="🎉 全自动 PR 成功！" data-en="🎉 PR Successfully Created!">🎉 全自动 PR 成功！</p>
+        <button class="btn-primary full-width i18n" id="btn-go-pr" style="background: #10b981; margin-top: 10px;" data-zh="查看已生成的 Pull Request" data-en="View generated Pull Request">查看已生成的 Pull Request</button>
+        <button class="btn-text full-width i18n" id="btn-close-progress" style="margin-top: 10px;" data-zh="返回主页" data-en="Back to Home">返回主页</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/index.js"></script>
+  
+  <!-- UI 前端独立交互脚本 (仅保留多语言切换) -->
+  <script>
+    (function() {
+      // 1. 中英双语切换逻辑
+      let currentLang = 'zh';
+      const langBtn = document.getElementById('btn-lang-toggle');
+      if (langBtn) {
+        langBtn.addEventListener('click', () => {
+          currentLang = currentLang === 'zh' ? 'en' : 'zh';
+          langBtn.textContent = currentLang === 'zh' ? 'EN' : '中';
+          
+          document.querySelectorAll('.i18n').forEach(el => {
+            const text = el.getAttribute('data-' + currentLang);
+            if (text) el.textContent = text;
+          });
+
+          document.querySelectorAll('.i18n-ph').forEach(el => {
+            const text = el.getAttribute('data-' + currentLang);
+            if (text) el.placeholder = text;
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
