@@ -1,0 +1,9 @@
+<resources>
+    <!-- Framework theme — no AppCompat or Material library needed.
+         Compose takes over the window immediately in setContent{},
+         so this is only visible during the brief cold-start splash. -->
+    <style name="Theme.OneClickPR" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>
