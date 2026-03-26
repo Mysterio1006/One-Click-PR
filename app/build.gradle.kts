@@ -15,6 +15,22 @@ android {
         versionName = "1.0"
     }
 
+    // 配置构建类型
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        
+        debug {
+            isMinifyEnabled = false
+        }
+    }
+
     buildFeatures {
         compose = true
     }
@@ -40,12 +56,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.documentfile)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.material.icons.extended)
     
-    // 网络与 JSON
     implementation(libs.okhttp)
     implementation(libs.gson)
-    
-    // 强大的 Compose M3 Markdown 解析器 (支持 GFM 语法与图片预览)
-    implementation(libs.mikepenz.markdown.m3)
 }

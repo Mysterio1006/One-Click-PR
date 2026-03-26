@@ -9,7 +9,6 @@ documentfile = "1.1.0"
 coil = "2.6.0"
 okhttp = "4.12.0"
 gson = "2.10.1"
-markdown = "0.26.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -28,7 +27,5 @@ androidx-ui-graphics                 = { group = "androidx.compose.ui",        n
 androidx-material3                   = { group = "androidx.compose.material3", name = "material3" }
 androidx-documentfile                = { group = "androidx.documentfile",      name = "documentfile", version.ref = "documentfile" }
 coil-compose                         = { group = "io.coil-kt",                 name = "coil-compose",        version.ref = "coil" }
-androidx-material-icons-extended     = { group = "androidx.compose.material",  name = "material-icons-extended" }
 okhttp                               = { group = "com.squareup.okhttp3",       name = "okhttp",              version.ref = "okhttp" }
 gson                                 = { group = "com.google.code.gson",       name = "gson",                version.ref = "gson" }
-mikepenz-markdown-m3                 = { group = "com.mikepenz",               name = "multiplatform-markdown-renderer-m3", version.ref = "markdown" }

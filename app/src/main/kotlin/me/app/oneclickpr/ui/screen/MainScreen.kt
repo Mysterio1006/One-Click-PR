@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,9 +39,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.mikepenz.markdown.m3.Markdown
 import me.app.oneclickpr.MainViewModel
 import me.app.oneclickpr.MainViewModel.Language
+import me.app.oneclickpr.ui.components.SimpleMarkdown
+import me.app.oneclickpr.ui.theme.AppIcons
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -98,11 +96,11 @@ fun MainContent(vm: MainViewModel) {
             TopAppBar(
                 title = { Text("One-Click PR", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { vm.navigateToHistory() }) { Icon(Icons.Default.History, contentDescription = "History", tint = MaterialTheme.colorScheme.onSurface) }
+                    IconButton(onClick = { vm.navigateToHistory() }) { Icon(AppIcons.History, contentDescription = "History", tint = MaterialTheme.colorScheme.onSurface) }
                     TextButton(onClick = { vm.toggleLanguage() }) { Text(if (language == Language.ZH) "EN" else "中", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
                     IconButton(onClick = { vm.showSettings.value = true }) {
                         if (githubUsername.isNotBlank()) AsyncImage(model = "https://github.com/${githubUsername}.png", contentDescription = "GitHub Avatar", contentScale = ContentScale.Crop, modifier = Modifier.size(32.dp).clip(CircleShape))
-                        else Icon(Icons.Default.AccountCircle, contentDescription = "Settings", modifier = Modifier.size(32.dp))
+                        else Icon(AppIcons.AccountCircle, contentDescription = "Settings", modifier = Modifier.size(32.dp))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
@@ -143,8 +141,13 @@ fun MainContent(vm: MainViewModel) {
                                 }
                             }
                             Box(modifier = Modifier.fillMaxWidth().heightIn(min = 220.dp)) {
-                                if (isPreviewMode) Box(modifier = Modifier.padding(16.dp).fillMaxWidth()) { Markdown(content = prDesc.ifBlank { i18n("暂无描述内容", "No description provided", language) }) }
-                                else TextField(value = prDesc, onValueChange = { vm.prDescription.value = it }, placeholder = { Text(i18n("支持 Markdown 语法。您可以手动输入内容或粘贴图片链接。", "Supports Markdown syntax.", language)) }, colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent), modifier = Modifier.fillMaxSize())
+                                if (isPreviewMode) {
+                                    Box(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                                        SimpleMarkdown(content = prDesc.ifBlank { i18n("暂无描述内容", "No description provided", language) }, fileNodes = flatFileNodes)
+                                    }
+                                } else {
+                                    TextField(value = prDesc, onValueChange = { vm.prDescription.value = it }, placeholder = { Text(i18n("支持 Markdown 语法。您可以手动输入内容或粘贴图片链接。", "Supports Markdown syntax.", language)) }, colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent), modifier = Modifier.fillMaxSize())
+                                }
                             }
                         }
                     }
@@ -154,7 +157,7 @@ fun MainContent(vm: MainViewModel) {
                             Checkbox(checked = allowMaintainerEdit, onCheckedChange = { vm.allowMaintainerEdit.value = it })
                             Text(text = i18n("允许维护者编辑此 PR", "Allow edits from maintainers", language), style = MaterialTheme.typography.bodyMedium)
                         }
-                        IconButton(onClick = { vm.requestAttachmentPicker() }) { Icon(imageVector = Icons.Default.AttachFile, contentDescription = "Attach", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        IconButton(onClick = { vm.requestAttachmentPicker() }) { Icon(imageVector = AppIcons.AttachFile, contentDescription = "Attach", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
             }
@@ -169,8 +172,8 @@ fun MainContent(vm: MainViewModel) {
                     }
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        ElevatedFilterChip(selected = false, onClick = { vm.requestFilePicker() }, label = { Text(i18n("添加代码文件", "Add File", language)) }, leadingIcon = { Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp)) })
-                        ElevatedFilterChip(selected = false, onClick = { vm.requestFolderPicker() }, label = { Text(i18n("添加文件夹", "Add Folder", language)) }, leadingIcon = { Icon(Icons.Default.CreateNewFolder, contentDescription = null, modifier = Modifier.size(18.dp)) })
+                        ElevatedFilterChip(selected = false, onClick = { vm.requestFilePicker() }, label = { Text(i18n("添加代码文件", "Add File", language)) }, leadingIcon = { Icon(AppIcons.Add, contentDescription = null, modifier = Modifier.size(18.dp)) })
+                        ElevatedFilterChip(selected = false, onClick = { vm.requestFolderPicker() }, label = { Text(i18n("添加文件夹", "Add Folder", language)) }, leadingIcon = { Icon(AppIcons.CreateNewFolder, contentDescription = null, modifier = Modifier.size(18.dp)) })
                     }
                     
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -206,12 +209,12 @@ fun MainContent(vm: MainViewModel) {
                                 ) {
                                     if (node.isDirectory) {
                                         IconButton(onClick = { vm.toggleNodeExpand(node.id) }, modifier = Modifier.size(24.dp)) {
-                                            Icon(if (node.isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowRight, contentDescription = "Expand", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Icon(if (node.isExpanded) AppIcons.KeyboardArrowDown else AppIcons.KeyboardArrowRight, contentDescription = "Expand", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
-                                        Icon(Icons.Default.Folder, contentDescription = "Folder", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                        Icon(AppIcons.Folder, contentDescription = "Folder", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                     } else {
                                         Spacer(modifier = Modifier.width(24.dp))
-                                        Icon(Icons.Default.InsertDriveFile, contentDescription = "File", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                                        Icon(AppIcons.InsertDriveFile, contentDescription = "File", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                                     }
                                     
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -225,7 +228,7 @@ fun MainContent(vm: MainViewModel) {
                                     
                                     if (node.depth == 0) {
                                         IconButton(onClick = { vm.removeNode(node.id) }, modifier = Modifier.size(24.dp)) {
-                                            Icon(Icons.Default.Close, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                                            Icon(AppIcons.Close, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
                                         }
                                     }
                                 }
@@ -257,7 +260,7 @@ fun GitignoreDialog(vm: MainViewModel) {
             Column(Modifier.padding(20.dp).fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(text = i18n("编辑过滤规则", "Edit Gitignore Rules", language), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = { vm.showGitignoreDialog.value = false }) { Icon(Icons.Default.Close, contentDescription = "Close") }
+                    IconButton(onClick = { vm.showGitignoreDialog.value = false }) { Icon(AppIcons.Close, contentDescription = "Close") }
                 }
                 
                 TextField(
@@ -287,8 +290,8 @@ fun HistoryContent(vm: MainViewModel) {
         topBar = {
             TopAppBar(
                 title = { Text(i18n("提交历史", "PR History", language), fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = { vm.route.value = "main" }) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") } },
-                actions = { if (historyList.isNotEmpty()) IconButton(onClick = { vm.clearHistory() }) { Icon(Icons.Default.Delete, contentDescription = "Clear", tint = MaterialTheme.colorScheme.error) } },
+                navigationIcon = { IconButton(onClick = { vm.route.value = "main" }) { Icon(AppIcons.ArrowBack, contentDescription = "Back") } },
+                actions = { if (historyList.isNotEmpty()) IconButton(onClick = { vm.clearHistory() }) { Icon(AppIcons.Delete, contentDescription = "Clear", tint = MaterialTheme.colorScheme.error) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         }
@@ -296,7 +299,7 @@ fun HistoryContent(vm: MainViewModel) {
         if (historyList.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(AppIcons.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(i18n("暂无提交记录", "No history available", language), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -336,7 +339,7 @@ fun SettingsDialog(vm: MainViewModel) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(text = i18n("全局凭证配置", "Global Credentials", language), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = { vm.showSettings.value = false }) { Icon(Icons.Default.Close, contentDescription = "Close") }
+                    IconButton(onClick = { vm.showSettings.value = false }) { Icon(AppIcons.Close, contentDescription = "Close") }
                 }
                 Text(text = i18n("凭证将保存在本地应用数据中，设置用户名后将自动拉取对应 GitHub 头像。", "Credentials are saved locally.", language), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(value = username, onValueChange = { username = it }, label = { Text(i18n("您的 GitHub 用户名", "Your GitHub Username", language)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
