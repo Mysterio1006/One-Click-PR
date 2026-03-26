@@ -42,6 +42,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
     
+    // 网络与 JSON
     implementation(libs.okhttp)
     implementation(libs.gson)
+    
+    // 强大的 Compose M3 Markdown 解析器 (支持 GFM 语法与图片预览)
+    implementation(libs.mikepenz.markdown.m3)
 }
