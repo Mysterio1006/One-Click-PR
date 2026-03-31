@@ -22,10 +22,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import me.app.oneclickpr.MainViewModel
 
-/**
- * 极致轻量的自研 Markdown 解析引擎
- * 拥有支持解析本地虚拟内存附件直显的杀手级功能。
- */
 @Composable
 fun SimpleMarkdown(content: String, fileNodes: List<MainViewModel.FileNode>) {
     val blocks = content.split(Regex("\n{2,}"))
@@ -65,7 +61,6 @@ fun SimpleMarkdown(content: String, fileNodes: List<MainViewModel.FileNode>) {
                     val url = match.groupValues[2]
                     
                     var model: Any = url
-                    // 智能拦截：将虚拟附件直接映射回手机相册真实的本地 URI 进行光速预览！
                     if (url.startsWith("pr_attachments/")) {
                         val fileName = url.removePrefix("pr_attachments/")
                         val fileItem = fileNodes.find { !it.isDirectory && (it.virtualPath == url || it.name == fileName) }
