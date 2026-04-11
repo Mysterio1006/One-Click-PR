@@ -14,7 +14,7 @@ jobs:
       - name: 获取源码
         uses: actions/checkout@v4
 
-      - name: 配置 Java 环境 (JDK 21)
+      - name: 配置 Java 环境
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
